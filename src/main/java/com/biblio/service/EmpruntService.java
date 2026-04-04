@@ -26,14 +26,16 @@ public class EmpruntService {
         Livre livre = livreRepository.findById(livreId)
                 .orElseThrow(() -> new RuntimeException("Livre introuvable"));
 
-        if (!livre.isDisponible()) {
-            throw new RuntimeException("Livre non disponible");
+        // 🔥 VRAIE vérification
+        if (empruntRepository.findByLivreAndDateRetourReelleIsNull(livre).isPresent()) {
+            throw new RuntimeException("Livre déjà emprunté");
         }
 
         Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
         livre.setDisponible(false);
+        livreRepository.save(livre);
 
         Emprunt emprunt = new Emprunt();
         emprunt.setLivre(livre);
@@ -49,10 +51,16 @@ public class EmpruntService {
         Emprunt emprunt = empruntRepository.findById(empruntId)
                 .orElseThrow(() -> new RuntimeException("Emprunt introuvable"));
 
+        // 🔥 sécurité
+        if (emprunt.getDateRetourReelle() != null) {
+            throw new RuntimeException("Livre déjà retourné");
+        }
+
         emprunt.setDateRetourReelle(LocalDate.now());
 
         Livre livre = emprunt.getLivre();
         livre.setDisponible(true);
+        livreRepository.save(livre);
 
         return empruntRepository.save(emprunt);
     }

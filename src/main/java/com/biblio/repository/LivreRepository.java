@@ -11,6 +11,6 @@ public interface LivreRepository extends JpaRepository<Livre, Long> { // Entité
     List<Livre> findByDisponibleTrue();
     // SELECT * FROM livre
    // WHERE LOWER(titre) LIKE LOWER('%mot%');
-
+    boolean existsByIsbn(String isbn);
 }
 
